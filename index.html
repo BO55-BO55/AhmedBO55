@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotics Club Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <nav id="navbar" class="navbar hidden">
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <h2>🤖 Robotics Club</h2>
+                </div>
+                <div class="nav-links">
+                    <a href="#" id="dashboardLink" class="nav-link active">Dashboard</a>
+                    <a href="#" id="adminLink" class="nav-link hidden">Admin Panel</a>
+                    <div class="user-info">
+                        <span id="navUserEmail"></span>
+                        <button id="navLogoutBtn" class="logout-btn-nav">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="main-container">
+            <div id="configNotice" class="config-notice">
+                <strong>Setup Required:</strong> Please configure your Firebase settings in the <code>app.js</code> file.
+            </div>
+
+            <div id="loginForm" class="form-container">
+                <div class="form-header">
+                    <h1>Welcome Back</h1>
+                    <p>Sign in to your account</p>
+                </div>
+                <div id="loginAlert"></div>
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn" id="loginBtn">Sign In</button>
+                </form>
+                 <div class="toggle-form">
+                    <button id="showScannerBtn" class="btn btn-secondary">Scan QR Code</button>
+                    <p>Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+                </div>
+            </div>
+            
+            <div id="qrScanner" class="form-container hidden">
+                <div class="form-header">
+                    <h1>Scan QR Code</h1>
+                    <p>Point your camera at the QR code on your badge.</p>
+                </div>
+                <video id="scannerVideo" playsinline></video>
+                <div id="scannerMessage" class="alert hidden"></div>
+                <button id="cancelScanBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+
+
+            <div id="signupForm" class="form-container hidden">
+                <div class="form-header">
+                    <h1>Create Account</h1>
+                    <p>Join our robotics club</p>
+                </div>
+                <div id="signupAlert"></div>
+                <form id="signupFormElement">
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="childName">Child's Name</label>
+                        <input type="text" id="childName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="parentName">Parent's Name</label>
+                        <input type="text" id="parentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn" id="signupBtn">Create Account</button>
+                </form>
+                <div class="toggle-form">
+                    <p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>
+                </div>
+            </div>
+
+            <div id="parentDashboard" class="dashboard hidden">
+                <div class="dashboard-header">
+                    <h2>Welcome, <span id="parentNameDisplay"></span></h2>
+                    <p>Child: <span id="childNameDisplay"></span></p>
+                </div>
+                <div class="parent-dashboard-grid">
+                    <div class="dashboard-column">
+                        <div class="card">
+                            <h3>💰 Payment Status</h3>
+                            <div class="payment-info">
+                                <div class="payment-status" id="paymentStatus">
+                                    <span class="status-indicator"></span>
+                                    <span id="paymentText">Loading...</span>
+                                </div>
+                                <div class="last-payment">
+                                    Last Payment: <span id="lastPaymentDate">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>🚀 Project Progress</h3>
+                            <p class="project-name">Current Project: <strong id="projectNameDisplay">Not Assigned</strong></p>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="projectProgressBar"></div>
+                            </div>
+                            <span class="progress-text" id="projectProgressText">0%</span>
+                        </div>
+                        <div class="card">
+                            <h3>📅 Attendance Record</h3>
+                            <div class="attendance-grid" id="attendanceGrid">
+                                </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-column">
+                        <div class="card card-full-height">
+                            <h3>📢 Announcements</h3>
+                            <div id="announcementsList" class="announcements-list">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adminDashboard" class="dashboard hidden">
+                <div class="dashboard-header">
+                    <h2>👨‍💼 Admin Panel</h2>
+                    <p>Manage club members and announcements</p>
+                </div>
+                <div class="admin-dashboard-grid">
+                    <div class="dashboard-column">
+                        <div class="card">
+                            <h3>👥 All Users</h3>
+                            <div class="users-list" id="usersList">
+                                </div>
+                        </div>
+                         <div class="card">
+                            <h3>📢 Manage Announcements</h3>
+                            <form id="announcementForm">
+                                <div class="form-group">
+                                    <input type="text" id="announcementTitle" placeholder="Announcement Title" required>
+                                </div>
+                                <div class="form-group">
+                                    <textarea id="announcementContent" placeholder="Announcement content..." required rows="4"></textarea>
+                                </div>
+                                <button type="submit" class="btn-small" id="postAnnouncementBtn">Post</button>
+                            </form>
+                            <hr class="divider">
+                            <h4>Existing Announcements</h4>
+                            <div class="announcements-list-admin" id="announcementsListAdmin">
+                                </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-column">
+                         <div class="card hidden" id="userEditor">
+                            <h3>✏️ Edit User: <span id="editingUserName"></span></h3>
+                            
+                            <div class="editor-section">
+                                <h4>Payment Status</h4>
+                                <div class="payment-controls">
+                                    <select id="paymentStatusSelect">
+                                        <option value="paid">Paid</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="overdue">Overdue</option>
+                                    </select>
+                                    <input type="date" id="lastPaymentInput">
+                                </div>
+                            </div>
+
+                            <div class="editor-section">
+                                <h4>Project Progress</h4>
+                                <div class="project-controls">
+                                    <input type="text" id="projectInput" placeholder="Project Name">
+                                    <input type="number" id="progressInput" min="0" max="100" placeholder="Progress %">
+                                </div>
+                            </div>
+
+                            <div class="editor-section">
+                                <h4>Attendance Record</h4>
+                                <div class="attendance-editor" id="attendanceEditor">
+                                    </div>
+                            </div>
+
+                            <button class="btn" id="saveUserChangesBtn">Save Changes</button>
+                            <button class="btn btn-secondary" id="printBadgeBtn">Print Badge</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="modal-container hidden">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Robotics Club Badge</h2>
+            <p id="badgeName"></p>
+            <canvas id="qrCanvas"></canvas>
+            <p>Scan this code to log in.</p>
+            <button id="printBtn" class="btn">Print</button>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
